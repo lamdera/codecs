@@ -64,14 +64,8 @@ var _LamderaCodecs_bytesDecodeStrict = F2(function(decoder, bytes)
 {
   try {
     var res = A2(_LamderaCodecs_decoderFn(decoder), bytes, 0);
-    const w = bytes.byteLength;
-    if (w !== res.a) {
-      // For now just log issues, in future we'll actually fail on this case
-      console.log(`❌ bytesDecodeStrict did not consume all bytes: length:${w}, consumed:${res.a}`, res.b, new Uint8Array(bytes.buffer));
-    }
-    return __Maybe_Just(res.b);
+    return bytes.byteLength === res.a ? __Maybe_Just(res.b) : __Maybe_Nothing;
   } catch(e) {
-    console.log('❌ bytesDecodeStrict unexpected error:', e);
     return __Maybe_Nothing;
   }
 });

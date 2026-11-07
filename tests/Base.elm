@@ -29,6 +29,36 @@ suite =
         , describe "Containers" containersTests
         , describe "Object" objectTests
         , describe "maybe" maybeTests
+        , describe "Strict decoding"
+            [ test "rejects trailing bytes while public bytesDecode remains permissive"
+                (\_ ->
+                    let
+                        bytes =
+                            Bytes.Encode.encode (Bytes.Encode.sequence [ Wire3.encodeInt -7, Bytes.Encode.unsignedInt8 17 ])
+                    in
+                    ( Wire3.bytesDecodeStrict Wire3.decodeInt bytes, Wire3.bytesDecode Wire3.decodeInt bytes )
+                        |> Expect.equal ( Nothing, Just -7 )
+                )
+            , test "rejects a truncated value"
+                (\_ ->
+                    Bytes.Encode.encode (Bytes.Encode.unsignedInt8 216)
+                        |> Wire3.bytesDecodeStrict Wire3.decodeInt
+                        |> Expect.equal Nothing
+                )
+            , test "accepts an empty success only with empty input"
+                (\_ ->
+                    ( Wire3.bytesDecodeStrict (Wire3.succeedDecode 632) (Bytes.Encode.encode (Bytes.Encode.sequence []))
+                    , Wire3.bytesDecodeStrict (Wire3.succeedDecode 632) (Bytes.Encode.encode (Bytes.Encode.unsignedInt8 17))
+                    )
+                        |> Expect.equal ( Just 632, Nothing )
+                )
+            , test "rejects explicit decoder failure"
+                (\_ ->
+                    Bytes.Encode.encode (Bytes.Encode.sequence [])
+                        |> Wire3.bytesDecodeStrict Wire3.failDecode
+                        |> Expect.equal Nothing
+                )
+            ]
         , describe "succeed"
             [ test "roundtrips"
                 (\_ ->
