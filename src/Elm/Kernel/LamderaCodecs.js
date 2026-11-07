@@ -55,20 +55,17 @@ var _LamderaCodecs_debug = function(s) {
   return _Utils_Tuple0;
 }
 
+function _LamderaCodecs_decoderFn__DEBUG(decoder) { return decoder.a; }
+function _LamderaCodecs_decoderFn__PROD(decoder) { return decoder; }
+
 // Duplicate of _Bytes_decode that expects all bytes to be consumed,
 // otherwise it fails to decode.
 var _LamderaCodecs_bytesDecodeStrict = F2(function(decoder, bytes)
 {
   try {
-    var res = A2(decoder, bytes, 0);
-    const w = bytes.byteLength;
-    if (w !== res.a) {
-      // For now just log issues, in future we'll actually fail on this case
-      console.log(`❌ bytesDecodeStrict did not consume all bytes: length:${w}, consumed:${res.a}`, res.b, new Uint8Array(bytes.buffer));
-    }
-    return __Maybe_Just(res.b);
+    var res = A2(_LamderaCodecs_decoderFn(decoder), bytes, 0);
+    return bytes.byteLength === res.a ? __Maybe_Just(res.b) : __Maybe_Nothing;
   } catch(e) {
-    console.log('❌ bytesDecodeStrict unexpected error:', e);
     return __Maybe_Nothing;
   }
 });
